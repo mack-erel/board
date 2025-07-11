@@ -1,7 +1,14 @@
 {
     "name": "board",
     "account_id": "",
-    "main": "./.cloudflare/worker.js",
+    "main": "./.svelte-kit/cloudflare/_worker.js",
+    "assets": {
+        "directory": "./.svelte-kit/cloudflare"
+    },
+    "compatibility_date": "2025-07-11",
+    "observability": {
+        "enabled": true
+    },
     "d1_databases": [
         {
             "binding": "D1_DB",
@@ -9,5 +16,8 @@
             "database_id": "",
             "migrations_dir": "./drizzle"
         }
+    ],
+    "compatibility_flags": [
+        "nodejs_compat"
     ]
 }

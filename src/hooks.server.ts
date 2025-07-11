@@ -1,8 +1,6 @@
 import { d1 } from "$lib/server/d1";
-import { user } from "$lib/server/d1/schema";
 import type { Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
-import { sql } from "drizzle-orm";
 
 const handles = [];
 
