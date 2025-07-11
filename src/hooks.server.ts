@@ -6,7 +6,7 @@ const handles = [];
 
 const dbHandle: Handle = async ({ event, resolve }) => {
     const DBBinding = event.platform?.env.D1_DB;
-    event.locals.db = d1(DBBinding);
+    event.locals.d1 = d1(DBBinding);
 
     return resolve(event);
 }

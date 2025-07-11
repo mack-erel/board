@@ -4,7 +4,7 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			db: DrizzleD1Database<Record<string, never>> & {
+			d1: DrizzleD1Database<Record<string, never>> & {
 				$client: D1Database;
 			};
 		}
