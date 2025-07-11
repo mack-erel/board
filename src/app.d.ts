@@ -1,5 +1,6 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
+import type { D1Database } from '@cloudflare/workers-types';
 declare global {
 	namespace App {
 		// interface Error {}
@@ -13,6 +14,9 @@ declare global {
 		interface Platform {
 			env: {
 				D1_DB: D1Database;
+				ASSETS: {
+					fetch: typeof fetch;
+				}
 			}
 		}
 	}
