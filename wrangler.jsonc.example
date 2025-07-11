@@ -1,0 +1,13 @@
+{
+    "name": "board",
+    "account_id": "",
+    "main": "./.cloudflare/worker.js",
+    "d1_databases": [
+        {
+            "binding": "D1_DB",
+            "database_name": "board",
+            "database_id": "",
+            "migrations_dir": "./drizzle"
+        }
+    ]
+}
