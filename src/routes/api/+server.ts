@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 
 export const GET = async ({ locals }) => {
-    const d1 = locals.db;
+    const d1 = locals.d1;
 
     let status = true;
 
