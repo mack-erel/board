@@ -6,7 +6,21 @@ import crypto from "node:crypto";
 export const POST = async (event) => {
     const { request, locals: { d1 } } = event;
 
-    const body = await request.json();
+    let body: Record<string, string> = {};
+    if (request.headers.get("content-type")?.includes("application/json")) {
+        body = await request.json();
+    } else if (request.headers.get("content-type")?.includes("multipart/form-data")) {
+        const formData = await request.formData();
+        body = Object.fromEntries(formData) as Record<string, string>;
+    } else if (request.headers.get("content-type")?.includes("application/x-www-form-urlencoded")) {
+        const formData = await request.formData();
+        body = Object.fromEntries(formData) as Record<string, string>;
+    } else {
+        return json({
+            status: "error",
+            message: "Invalid content type",
+        }, { status: 400 });
+    }
 
     const undefined_params = {} as Record<string, string>;
 

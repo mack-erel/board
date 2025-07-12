@@ -1,5 +1,5 @@
-import { creator } from "$lib/server/d1/schema.js";
-import { json, text } from "@sveltejs/kit";
+import { board, creator } from "$lib/server/d1/schema.js";
+import { json } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import crypto from "node:crypto";
 
@@ -15,7 +15,7 @@ export const POST = async (event) => {
         }, { status: 401 });
     }
 
-    let userInfo = {};
+    let userInfo: { uuid?: string; creator?: string; password?: string; createdAt?: number } = {};
 
     if (authorization.startsWith("Basic ")) {
         const base64Credentials = authorization.split(" ")[1];
@@ -48,35 +48,85 @@ export const POST = async (event) => {
         }
 
         userInfo = login[0];
+    } else {
+        return json({
+            status: "error",
+            message: "Invalid authorization format"
+        }, { status: 401 });
     }
 
-    console.log(userInfo);
-    // const { locals, request } = event;
-    // const d1 = locals.d1;
+    let body: Record<string, string> = {};
+    if (request.headers.get("content-type")?.includes("application/json")) {
+        body = await request.json();
+    } else if (request.headers.get("content-type")?.includes("multipart/form-data")) {
+        const formData = await request.formData();
+        body = Object.fromEntries(formData) as Record<string, string>;
+    } else if (request.headers.get("content-type")?.includes("application/x-www-form-urlencoded")) {
+        const formData = await request.formData();
+        body = Object.fromEntries(formData) as Record<string, string>;
+    } else {
+        return json({
+            status: "error",
+            message: "Invalid content type",
+        }, { status: 400 });
+    }
 
-    // const body = await request.json();
+    const undefined_params = {} as Record<string, string>;
 
-    // const undefined_params = [];
+    if (typeof body.name === "undefined" || body.name.trim() === "") {
+        undefined_params.name = "string";
+    }
 
-    // if (typeof body.creator === "undefined") {
-    //     undefined_params.push({ "creator": "string" });
-    // }
-    // if (typeof body.name === "undefined") {
-    //     undefined_params.push({ "name": "string" });
-    // }
+    if (Object.keys(undefined_params).length > 0) {
+        return json({
+            status: "error",
+            message: "Missing parameters",
+            data: undefined_params
+        }, { status: 400 });
+    }
 
-    // if (undefined_params.length > 0) {
-    //     return json({
-    //         status: "error",
-    //         message: "Missing parameters",
-    //         data: [...undefined_params]
-    //     });
-    // }
+    if (!userInfo.uuid) {
+        return json({
+            status: "error",
+            message: "Invalid credentials"
+        }, { status: 401 });
+    }
 
-    // const { creator, name } = body;
-    // const uuid = crypto.randomUUID();
+    const checkExists = await d1.select()
+        .from(board)
+        .where(
+            eq(board.creator, userInfo.uuid),
+            eq(board.name, body.name)
+        );
 
+    if (checkExists.length > 0) {
+        return json({
+            status: "error",
+            message: "Board already exists",
+        }, { status: 409 });
+    }
 
+    const newBoard = {
+        uuid: crypto.randomUUID(),
+        creator: userInfo.uuid,
+        name: body.name
+    };
 
-    return json({});
+    try {
+        await d1.insert(board).values(newBoard);
+
+        return json({
+            status: "success",
+            data: {
+                uuid: newBoard.uuid,
+                name: newBoard.name
+            }
+        });
+    } catch (error: any) {
+        return json({
+            status: "error",
+            message: "Database error",
+            data: error.message
+        });
+    }
 }
