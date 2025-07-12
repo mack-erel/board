@@ -8,5 +8,8 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit(),
 		devtoolsJson()
-	]
+	],
+	server: {
+		host: "0.0.0.0"
+	}
 });
